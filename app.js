@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
-
-//randomm middleware
+const expressError = require("./expressError");
+//randomm middleware -> run for every incoming request
 // app.use((req,res, next)=>{
 //     console.log("Hi, I am middleware");
 //     // res.send("middleware finished"); generally middleware not send response
@@ -51,7 +51,7 @@ const checkToken = (req,res,next)=>{
     if(token === "giveaccess"){
         next();
     }
-    throw new Error("Access Denied!");
+    throw new expressError(401,"Access Denied!");
 };
 
 app.get("/api",checkToken,(req,res)=>{
@@ -67,11 +67,29 @@ app.get("/random",(req,res)=>{
 });
 
 
-//if path not found then this middleware execute -> error handling
-app.use((req,res)=>{
-    // res.send("Page not found!");
-    res.status(404).send("page not found!");
+app.get("/err",(req,res)=>{
+    abcd = abcd;
+
 });
+
+app.get("/admin",(req,res)=>{
+      throw new expressError(403, "Access to admin is forbeddin");
+});
+
+
+//error handling
+//custom error handler
+app.use((err,req,res,next)=>{
+      let{status=500,message="failed"} = err;
+      res.status(status).send(message);
+});
+
+
+//if path not found then this middleware execute
+// app.use((req,res)=>{
+//     // res.send("Page not found!");
+//     res.status(404).send("page not found!");
+// });
 
 app.listen(8080,()=>{
     console.log("server listening to port 8080");
